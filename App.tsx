@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import Video from 'react-native-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -48,6 +48,36 @@ const FEED: FeedItem[] = [
       'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_5MB.mp4',
     ],
   },
+  {
+    kind: 'video',
+    id: 'v3',
+    title: 'Nature',
+    urls: [
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    ],
+  },
+  {
+    kind: 'video',
+    id: 'v4',
+    title: 'Nature',
+    urls: [
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    ],
+  },
+  {
+    kind: 'video',
+    id: 'v5',
+    title: 'Nature',
+    urls: [
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    ],
+  },
 ];
 
 const flattenFeed = (feed: FeedItem[]): FlatRow[] => {
@@ -72,86 +102,70 @@ const flattenFeed = (feed: FeedItem[]): FlatRow[] => {
 
 const DATA = flattenFeed(FEED);
 
-const VideoRow = ({ url, scrollY }: { url: string; scrollY: number }) => {
-  const [playing, setPlaying] = useState(false);
+const VideoRow = ({ url }: { url: string }) => {
+  const [paused, setPaused] = useState(true);
 
   return (
     <View style={styles.videoContainer}>
       <VisibilityView
         threshold={0.5}
-        onFocus={() => setPlaying(true)}
-        onBlur={() => setPlaying(false)}
+        onFocus={() => setPaused(false)}
+        onBlur={() => setPaused(true)}
       >
         <Video
           source={{ uri: url }}
-          paused={!playing}
+          paused={paused}
           repeat
           resizeMode="cover"
           style={styles.video}
         />
       </VisibilityView>
-
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>
-          {playing ? '▶ Playing' : '⏸ Paused'}
-        </Text>
-      </View>
     </View>
   );
 };
 
 export default function App() {
-  const [scrollY, setScrollY] = useState(0);
+  const renderRow = useCallback((item: FlatRow) => {
+    if (item.kind === 'text') {
+      return (
+        <View key={item.id} style={styles.textCard}>
+          <Text style={styles.heading}>{item.heading}</Text>
+          <Text style={styles.body}>{item.body}</Text>
+        </View>
+      );
+    }
 
-  const renderRow = useCallback(
-    (item: FlatRow) => {
-      if (item.kind === 'text') {
-        return (
-          <View key={item.id} style={styles.textCard}>
-            <Text style={styles.heading}>{item.heading}</Text>
-            <Text style={styles.body}>{item.body}</Text>
-          </View>
-        );
-      }
+    if (item.kind === 'block') {
+      return (
+        <View
+          key={item.id}
+          style={[styles.banner, { backgroundColor: item.color }]}
+        >
+          <Text style={styles.bannerText}>{item.label}</Text>
+        </View>
+      );
+    }
 
-      if (item.kind === 'block') {
-        return (
-          <View
-            key={item.id}
-            style={[styles.banner, { backgroundColor: item.color }]}
-          >
-            <Text style={styles.bannerText}>{item.label}</Text>
-          </View>
-        );
-      }
-
-      return <VideoRow key={item.id} url={item.url} scrollY={scrollY} />;
-    },
-    [scrollY],
-  );
+    return <VideoRow key={item.id} url={item.url} />;
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView
-        onScroll={e => setScrollY(e.nativeEvent.contentOffset.y)}
-        scrollEventThrottle={32}
-      >
-        {DATA.map(renderRow)}
-      </ScrollView>
+      <ScrollView>{DATA.map(renderRow)}</ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   videoContainer: {
-    height: 260,
+    height: 500,
     backgroundColor: 'black',
     marginVertical: 6,
   },
 
   video: {
     width,
-    height: 260,
+    height: 500,
   },
 
   badge: {
