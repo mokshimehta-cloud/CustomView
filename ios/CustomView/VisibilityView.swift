@@ -5,6 +5,7 @@ class VisibilityView: UIView {
 
   @objc var threshold: NSNumber = 0.5
   @objc var onVisibilityChange: RCTDirectEventBlock?
+  @objc var disabled: NSNumber = 0
 
   private var isCurrentlyVisible = false
   private var displayLink: CADisplayLink?
@@ -32,6 +33,12 @@ class VisibilityView: UIView {
   }
 
   @objc private func checkVisibility() {
+    // If disabled, force blur and skip visibility computation
+    if disabled.boolValue {
+      updateVisibility(false)
+      return
+    }
+
     guard let window = window else { return }
 
     let viewFrame = convert(bounds, to: window)

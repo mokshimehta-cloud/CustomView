@@ -102,56 +102,91 @@ const flattenFeed = (feed: FeedItem[]): FlatRow[] => {
 
 const DATA = flattenFeed(FEED);
 
-const VideoRow = ({ url }: { url: string }) => {
+const VideoRow = ({ url, disabled }: { url: string; disabled: boolean }) => {
   const [paused, setPaused] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   return (
     <View style={styles.videoContainer}>
       <VisibilityView
         threshold={0.5}
-        onFocus={() => setPaused(false)}
-        onBlur={() => setPaused(true)}
+        disabled={disabled}
+        onFocus={() => {
+          console.log('VisibilityView onFocus', { url, disabled });
+          setPaused(false);
+        }}
+        onBlur={() => {
+          console.log('VisibilityView onBlur', { url, disabled });
+          setPaused(true);
+        }}
       >
-        <Video
-          source={{ uri: url }}
-          paused={paused}
-          repeat
-          resizeMode="cover"
-          style={styles.video}
-        />
+        {
+          <Video
+            source={{ uri: url }}
+            paused={paused}
+            repeat
+            resizeMode="cover"
+            style={styles.video}
+          />
+        }
       </VisibilityView>
     </View>
   );
 };
 
 export default function App() {
-  const renderRow = useCallback((item: FlatRow) => {
-    if (item.kind === 'text') {
-      return (
-        <View key={item.id} style={styles.textCard}>
-          <Text style={styles.heading}>{item.heading}</Text>
-          <Text style={styles.body}>{item.body}</Text>
-        </View>
-      );
-    }
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollStopTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    if (item.kind === 'block') {
-      return (
-        <View
-          key={item.id}
-          style={[styles.banner, { backgroundColor: item.color }]}
-        >
-          <Text style={styles.bannerText}>{item.label}</Text>
-        </View>
-      );
-    }
+  const renderRow = useCallback(
+    (item: FlatRow) => {
+      if (item.kind === 'text') {
+        return (
+          <View key={item.id} style={styles.textCard}>
+            <Text style={styles.heading}>{item.heading}</Text>
+            <Text style={styles.body}>{item.body}</Text>
+          </View>
+        );
+      }
 
-    return <VideoRow key={item.id} url={item.url} />;
-  }, []);
+      if (item.kind === 'block') {
+        return (
+          <View
+            key={item.id}
+            style={[styles.banner, { backgroundColor: item.color }]}
+          >
+            <Text style={styles.bannerText}>{item.label}</Text>
+          </View>
+        );
+      }
+
+      return <VideoRow key={item.id} url={item.url} disabled={isScrolling} />;
+    },
+    [isScrolling],
+  );
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView>{DATA.map(renderRow)}</ScrollView>
+      <ScrollView
+        scrollEventThrottle={32}
+        onScroll={() => {
+          if (!isScrolling) {
+            setIsScrolling(true);
+            console.log('Scroll: start, disabled=true');
+          }
+
+          if (scrollStopTimeout.current) {
+            clearTimeout(scrollStopTimeout.current);
+          }
+
+          scrollStopTimeout.current = setTimeout(() => {
+            setIsScrolling(false);
+            console.log('Scroll: stop, disabled=false');
+          }, 120);
+        }}
+      >
+        {DATA.map(renderRow)}
+      </ScrollView>
     </SafeAreaView>
   );
 }

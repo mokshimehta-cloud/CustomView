@@ -12,9 +12,17 @@ class VisibilityView(
 
     private var isFocused = false
     private var threshold = 0.5f
+    private var disabled = false
 
     fun setThreshold(value: Float) {
         threshold = value
+    }
+
+    fun setDisabled(value: Boolean) {
+        disabled = value
+        if (disabled) {
+            updateFocus(false)
+        }
     }
 
     override fun onAttachedToWindow() {
@@ -35,6 +43,11 @@ class VisibilityView(
     }
 
     private fun checkVisibility() {
+        if (disabled) {
+            updateFocus(false)
+            return
+        }
+
         val rect = Rect()
         val isVisibleNow = getGlobalVisibleRect(rect)
 
