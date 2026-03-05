@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  FlatList,
+} from 'react-native';
 import Video from 'react-native-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import VisibilityView from './src/components/VisibilityView';
+import { FlashList } from '@shopify/flash-list';
 
 const { width } = Dimensions.get('window');
 
@@ -78,36 +86,6 @@ const FEED: FeedItem[] = [
       'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
     ],
   },
-  {
-    kind: 'video',
-    id: 'v6',
-    title: 'Nature',
-    urls: [
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-    ],
-  },
-  {
-    kind: 'video',
-    id: 'v7',
-    title: 'Nature',
-    urls: [
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-    ],
-  },
-  {
-    kind: 'video',
-    id: 'v8',
-    title: 'Nature',
-    urls: [
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-    ],
-  },
 ];
 
 const flattenFeed = (feed: FeedItem[]): FlatRow[] => {
@@ -155,6 +133,12 @@ const VideoRow = ({ url }: { url: string }) => {
             repeat
             resizeMode="cover"
             style={styles.video}
+            bufferConfig={{
+              minBufferMs: 15000,
+              maxBufferMs: 50000,
+              bufferForPlaybackMs: 2500,
+              bufferForPlaybackAfterRebufferMs: 5000,
+            }}
           />
         }
       </VisibilityView>
@@ -163,7 +147,7 @@ const VideoRow = ({ url }: { url: string }) => {
 };
 
 export default function App() {
-  const renderRow = (item: FlatRow) => {
+  const renderRow = ({ item }: { item: FlatRow }) => {
     if (item.kind === 'text') {
       return (
         <View key={item.id} style={styles.textCard}>
@@ -189,7 +173,12 @@ export default function App() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView scrollEventThrottle={32}>{DATA.map(renderRow)}</ScrollView>
+      <FlashList
+        data={DATA}
+        renderItem={renderRow}
+        keyExtractor={item => item.id}
+        // estimatedItemSize={500}
+      />
     </SafeAreaView>
   );
 }
