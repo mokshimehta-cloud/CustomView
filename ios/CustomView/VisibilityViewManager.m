@@ -4,6 +4,5 @@
 
 RCT_EXPORT_VIEW_PROPERTY(threshold, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(onVisibilityChange, RCTDirectEventBlock)
-RCT_EXPORT_VIEW_PROPERTY(onLog, RCTDirectEventBlock)
 
 @end

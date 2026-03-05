@@ -4,7 +4,6 @@ class VisibilityView: UIView {
 
     @objc var threshold: NSNumber = 0.5
     @objc var onVisibilityChange: RCTDirectEventBlock?
-    @objc var onLog: RCTDirectEventBlock?
 
     private var isCurrentlyVisible = false
     private var displayLink: CADisplayLink?
@@ -22,9 +21,7 @@ class VisibilityView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func console(_ message: String) {
-        onLog?(["message": message])
-    }
+  
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
