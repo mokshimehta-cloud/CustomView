@@ -1,26 +1,27 @@
 package com.customview
 
-import com.facebook.react.uimanager.ViewGroupManager
 import com.facebook.react.uimanager.ThemedReactContext
+import com.facebook.react.uimanager.ViewGroupManager
+import com.facebook.react.uimanager.annotations.ReactProp
+import com.facebook.react.common.MapBuilder
 
 class VisibilityViewManager : ViewGroupManager<VisibilityView>() {
 
-    override fun getName(): String {
-        return "VisibilityView"
-    }
+    override fun getName() = "VisibilityView"
 
-    override fun createViewInstance(
-        reactContext: ThemedReactContext
-    ): VisibilityView {
+    override fun createViewInstance(reactContext: ThemedReactContext): VisibilityView {
         return VisibilityView(reactContext)
     }
 
-    // ✅ REGISTER EVENT FOR FABRIC
-    override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "topVisibilityChange" to mutableMapOf(
-                "registrationName" to "onVisibilityChange"
-            )
-        )
+    @ReactProp(name = "threshold", defaultFloat = 0.5f)
+    fun setThreshold(view: VisibilityView, threshold: Float) {
+        view.setThreshold(threshold)
+    }
+
+    override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> {
+        return MapBuilder.builder<String, Any>()
+            .put("topVisibilityChange", MapBuilder.of("registrationName", "onVisibilityChange"))
+            .put("topLog", MapBuilder.of("registrationName", "onLog"))
+            .build()
     }
 }

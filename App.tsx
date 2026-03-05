@@ -110,13 +110,12 @@ const VideoRow = ({ url, disabled }: { url: string; disabled: boolean }) => {
     <View style={styles.videoContainer}>
       <VisibilityView
         threshold={0.5}
-        disabled={disabled}
         onFocus={() => {
-          console.log('VisibilityView onFocus', { url, disabled });
+          console.log('Visible');
           setPaused(false);
         }}
         onBlur={() => {
-          console.log('VisibilityView onBlur', { url, disabled });
+          console.log('Hidden');
           setPaused(true);
         }}
       >
@@ -167,26 +166,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView
-        scrollEventThrottle={32}
-        onScroll={() => {
-          if (!isScrolling) {
-            setIsScrolling(true);
-            console.log('Scroll: start, disabled=true');
-          }
-
-          if (scrollStopTimeout.current) {
-            clearTimeout(scrollStopTimeout.current);
-          }
-
-          scrollStopTimeout.current = setTimeout(() => {
-            setIsScrolling(false);
-            console.log('Scroll: stop, disabled=false');
-          }, 120);
-        }}
-      >
-        {DATA.map(renderRow)}
-      </ScrollView>
+      <ScrollView scrollEventThrottle={32}>{DATA.map(renderRow)}</ScrollView>
     </SafeAreaView>
   );
 }
