@@ -4,13 +4,25 @@ import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
-import com.facebook.react.uimanager.events.RCTEventEmitter
+import com.facebook.react.uimanager.UIManagerHelper
+import com.facebook.react.uimanager.events.Event
 import com.facebook.react.views.scroll.ReactScrollView
 import com.facebook.react.views.scroll.ReactHorizontalScrollView
+
+class VisibilityChangeEvent(
+    surfaceId: Int,
+    viewTag: Int,
+    private val focused: Boolean
+) : Event<VisibilityChangeEvent>(surfaceId, viewTag) {
+    override fun getEventName() = "topVisibilityChange"
+    override fun getEventData(): WritableMap = Arguments.createMap().also {
+        it.putBoolean("focused", focused)
+    }
+}
 
 class VisibilityView(
     private val reactContext: ThemedReactContext
@@ -21,17 +33,16 @@ class VisibilityView(
     private var isScrolling = false
     private var lastScrollY = 0
     private var lastScrollX = 0
-    
+
     private val handler = Handler(Looper.getMainLooper())
     private val scrollStopDelay = 150L
     private val frameCheckDelay = 16L // ~60fps
-    
+
     private val scrollStopRunnable = Runnable {
-        console("🛑 Scroll STOPPED - checking visibility")
         isScrolling = false
         checkVisibility()
     }
-    
+
     private val frameCheckRunnable = object : Runnable {
         override fun run() {
             checkScrollState()
@@ -45,14 +56,12 @@ class VisibilityView(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        console("✅ ATTACHED to window")
         handler.post(frameCheckRunnable)
         handler.postDelayed({ checkVisibility() }, 100)
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        console("❌ DETACHED from window")
         handler.removeCallbacks(frameCheckRunnable)
         handler.removeCallbacks(scrollStopRunnable)
     }
@@ -70,20 +79,18 @@ class VisibilityView(
 
     private fun checkScrollState() {
         val scrollView = findParentReactScrollView()
-        
+
         if (scrollView != null) {
             val currentScrollY = scrollView.scrollY
             val currentScrollX = scrollView.scrollX
-            
-            // Detect if scroll position changed
+
             if (currentScrollY != lastScrollY || currentScrollX != lastScrollX) {
                 onScrollDetected()
                 lastScrollY = currentScrollY
                 lastScrollX = currentScrollX
             }
         }
-        
-        // Only check visibility when not scrolling
+
         if (!isScrolling) {
             checkVisibility()
         }
@@ -91,22 +98,19 @@ class VisibilityView(
 
     private fun onScrollDetected() {
         if (!isScrolling) {
-            console("🔄 Scroll STARTED - pausing videos")
             isScrolling = true
-            updateFocus(false) // Immediately blur when scrolling starts
+            updateFocus(false)
         }
-        
-        // Reset scroll stop timer
+
         handler.removeCallbacks(scrollStopRunnable)
         handler.postDelayed(scrollStopRunnable, scrollStopDelay)
     }
 
     private fun checkVisibility() {
-        // Don't update focus while scrolling
         if (isScrolling) {
             return
         }
-        
+
         if (!isAttachedToWindow || height == 0) {
             updateFocus(false)
             return
@@ -124,7 +128,7 @@ class VisibilityView(
         if (parentScrollView != null) {
             val scrollRect = Rect()
             parentScrollView.getGlobalVisibleRect(scrollRect)
-            
+
             if (!viewRect.intersect(scrollRect)) {
                 updateFocus(false)
                 return
@@ -140,30 +144,14 @@ class VisibilityView(
 
     private fun updateFocus(visible: Boolean) {
         if (visible == isFocused) return
-        
+
         isFocused = visible
-        console("🎯 FOCUS: ${if (visible) "PLAYING ✅" else "PAUSED ❌"}")
 
-        val event = Arguments.createMap()
-        event.putBoolean("focused", visible)
-
-        reactContext
-            .getJSModule(RCTEventEmitter::class.java)
-            .receiveEvent(id, "topVisibilityChange", event)
-    }
-    
-    private fun console(message: String) {
-        // Log to JS console via event
-        val event = Arguments.createMap()
-        event.putString("message", message)
-        
         try {
-            reactContext
-                .getJSModule(RCTEventEmitter::class.java)
-                .receiveEvent(id, "topLog", event)
-        } catch (e: Exception) {
-            // Fallback to Android log
-            android.util.Log.d("VisibilityView", message)
+            val dispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, id)
+            val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
+            dispatcher?.dispatchEvent(VisibilityChangeEvent(surfaceId, id, visible))
+        } catch (_: Exception) {
         }
     }
 }
