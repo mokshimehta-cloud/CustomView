@@ -21,7 +21,6 @@ class VisibilityViewManager : ViewGroupManager<VisibilityView>() {
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> {
         return MapBuilder.builder<String, Any>()
             .put("topVisibilityChange", MapBuilder.of("registrationName", "onVisibilityChange"))
-            .put("topLog", MapBuilder.of("registrationName", "onLog"))
             .build()
     }
 }
