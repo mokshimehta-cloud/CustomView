@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import Video from 'react-native-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -78,6 +78,36 @@ const FEED: FeedItem[] = [
       'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
     ],
   },
+  {
+    kind: 'video',
+    id: 'v6',
+    title: 'Nature',
+    urls: [
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    ],
+  },
+  {
+    kind: 'video',
+    id: 'v7',
+    title: 'Nature',
+    urls: [
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    ],
+  },
+  {
+    kind: 'video',
+    id: 'v8',
+    title: 'Nature',
+    urls: [
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    ],
+  },
 ];
 
 const flattenFeed = (feed: FeedItem[]): FlatRow[] => {
@@ -102,9 +132,8 @@ const flattenFeed = (feed: FeedItem[]): FlatRow[] => {
 
 const DATA = flattenFeed(FEED);
 
-const VideoRow = ({ url, disabled }: { url: string; disabled: boolean }) => {
+const VideoRow = ({ url }: { url: string }) => {
   const [paused, setPaused] = useState(true);
-  const [visible, setVisible] = useState(false);
 
   return (
     <View style={styles.videoContainer}>
@@ -134,35 +163,29 @@ const VideoRow = ({ url, disabled }: { url: string; disabled: boolean }) => {
 };
 
 export default function App() {
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollStopTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const renderRow = (item: FlatRow) => {
+    if (item.kind === 'text') {
+      return (
+        <View key={item.id} style={styles.textCard}>
+          <Text style={styles.heading}>{item.heading}</Text>
+          <Text style={styles.body}>{item.body}</Text>
+        </View>
+      );
+    }
 
-  const renderRow = useCallback(
-    (item: FlatRow) => {
-      if (item.kind === 'text') {
-        return (
-          <View key={item.id} style={styles.textCard}>
-            <Text style={styles.heading}>{item.heading}</Text>
-            <Text style={styles.body}>{item.body}</Text>
-          </View>
-        );
-      }
+    if (item.kind === 'block') {
+      return (
+        <View
+          key={item.id}
+          style={[styles.banner, { backgroundColor: item.color }]}
+        >
+          <Text style={styles.bannerText}>{item.label}</Text>
+        </View>
+      );
+    }
 
-      if (item.kind === 'block') {
-        return (
-          <View
-            key={item.id}
-            style={[styles.banner, { backgroundColor: item.color }]}
-          >
-            <Text style={styles.bannerText}>{item.label}</Text>
-          </View>
-        );
-      }
-
-      return <VideoRow key={item.id} url={item.url} disabled={isScrolling} />;
-    },
-    [isScrolling],
-  );
+    return <VideoRow key={item.id} url={item.url} />;
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
