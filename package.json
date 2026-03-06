@@ -17,7 +17,7 @@
     "react-native": "0.84.1",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-video": "6.19.0",
-    "react-native-visibility-tracker": "github:mokshimehta-cloud/react-native-visibility-tracker"
+    "react-native-visibility-tracker": "git+https://github.com/mokshimehta-cloud/react-native-visibility-tracker.git"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
