@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  ScrollView,
-  FlatList,
-} from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Video from 'react-native-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import VisibilityView from './src/components/VisibilityView';
+import { VisibilityView } from 'react-native-visibility-tracker';
 import { FlashList } from '@shopify/flash-list';
 
 const { width } = Dimensions.get('window');

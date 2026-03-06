@@ -5500,6 +5500,10 @@ react-native-video@6.19.0:
   resolved "https://registry.npmjs.org/react-native-video/-/react-native-video-6.19.0.tgz"
   integrity sha512-JVojWIxwuH5C3RjVrF4UyuweuOH/Guq/W2xeN9zugePXZI8Xn/j6/oU94gCWHaFzkR/HGeJpqMq+l9aEHSnpIQ==
 
+"react-native-visibility-tracker@github:mokshimehta-cloud/react-native-visibility-tracker":
+  version "0.1.0"
+  resolved "git+ssh://git@github.com/mokshimehta-cloud/react-native-visibility-tracker.git#9158dd3f8d6a8cc2f4f5bf1ab9f34f80102f108d"
+
 react-native@*, react-native@0.84.1:
   version "0.84.1"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.84.1.tgz"
